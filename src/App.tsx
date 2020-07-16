@@ -1,25 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import { ThemeProvider } from "styled-components";
+import "./App.scss";
+import { myTheme } from "./theme";
+import {
+  StylesProvider,
+  MuiThemeProvider,
+  CssBaseline,
+  useMediaQuery,
+} from "@material-ui/core";
+import { Layout } from "./components/Layout";
+import { Landing } from "./pages/Landing";
+
+type themeChange = () => void;
+type handleMapsRendererChange = () => void;
 
 function App() {
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+  let theme = React.useMemo(() => myTheme(prefersDarkMode ? "dark" : "light"), [
+    prefersDarkMode,
+  ]);
+
+  const [currentTheme, setCurrentTheme] = useState("light");
+  const [currentMap, setCurrentMap] = useState("google");
+
+  const handleThemeChange: themeChange = () => {
+    if (currentTheme === "light") setCurrentTheme("dark");
+    else setCurrentTheme("light");
+  };
+
+  const handleMapsRendererChange = () => {
+    setCurrentMap(currentMap === "google" ? "mapbox" : "google");
+  };
+
+  theme = React.useMemo(() => myTheme(currentTheme), [currentTheme]);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <StylesProvider injectFirst>
+        <MuiThemeProvider theme={theme}>
+          <CssBaseline />
+          <Layout
+            handleThemeChange={handleThemeChange}
+            handleMapsRendererChange={handleMapsRendererChange}
+          >
+            <Landing currentTheme={currentTheme} currentMap={currentMap} />
+          </Layout>
+        </MuiThemeProvider>
+      </StylesProvider>
+    </ThemeProvider>
   );
 }
 
